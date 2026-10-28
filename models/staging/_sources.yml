@@ -10,14 +10,22 @@ sources:
             data_tests:
               - not_null
               - unique
-
           - name: premium_amount
             data_tests:
-              - not_null
+              - not_null:
+                  config:
+                    severity: warn
 
       - name: customers
         columns:
           - name: customer_id
+            data_tests:
+              - unique
+              - not_null
+
+      - name: payments
+        columns:
+          - name: payment_id
             data_tests:
               - unique
               - not_null

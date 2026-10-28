@@ -1,0 +1,14 @@
+version: 2
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: policies
+        columns:
+          - name: policy_id
+            data_tests:
+              - not_null
+              - unique
+      - name: premium_amount
+        data tests:
+          - not null

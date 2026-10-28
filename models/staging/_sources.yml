@@ -1,4 +1,5 @@
 version: 2
+
 sources:
   - name: raw
     schema: raw
@@ -9,6 +10,14 @@ sources:
             data_tests:
               - not_null
               - unique
-      - name: premium_amount
-        data tests:
-          - not null
+
+          - name: premium_amount
+            data_tests:
+              - not_null
+
+      - name: customers
+        columns:
+          - name: customer_id
+            data_tests:
+              - unique
+              - not_null

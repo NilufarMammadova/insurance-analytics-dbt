@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: fct_policies
+    description: "Policy-level insurance fact table with aggregated paid payments."
+    columns:      
+      - name: policy_status
+        description: "Normalized insurance policy status."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['ACTIVE', 'EXPIRED', 'CANCELLED']
+
+      - name: customer_id
+        description: "Customer associated with the insurance policy."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_id
+
+  - name: dim_customers
+    description: "Customer dimension with policy metrics and lifetime paid amount."
+    columns:
+      - name: customer_id
+        description: "Unique identifier of a customer."
+        data_tests:
+          - unique
+          - not_null

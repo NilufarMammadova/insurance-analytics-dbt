@@ -1,32 +1,43 @@
-WITH policies AS (
-
-    SELECT *
-    FROM {{ ref('stg_policies') }}
-
+with policies as (
+    select *
+    from {{ ref('stg_policies') }}
 ),
 
-paid_payments AS (
+payments as (
+    select *
+    from {{ ref('stg_payments') }}
+),
 
-    SELECT
+policy_payments as (
+    select
         policy_id,
-        SUM(amount) AS total_paid_amount
-    FROM {{ ref('stg_payments') }}
-    WHERE payment_status = 'PAID'
-    GROUP BY policy_id
+        sum(
+            case
+                when payment_status = 'PAID'
+                then amount
+                else 0
+            end
+        ) as total_paid_amount
+    from payments
+    group by policy_id
+),
 
+final as (
+    select
+        p.policy_id,
+        p.policy_number,
+        p.customer_id,
+        p.premium_amount,
+        p.policy_status,
+        p.premium_quality_status,
+        p.start_date,
+        p.end_date,
+        coalesce(pp.total_paid_amount, 0) as total_paid_amount
+
+    from policies p
+    left join policy_payments pp
+        on p.policy_id = pp.policy_id
 )
 
-SELECT
-    p.policy_id,
-    p.policy_number,
-    p.customer_id,
-    p.premium_amount,
-    p.policy_status,
-    p.premium_quality_status,
-    p.start_date,
-    p.end_date,
-    COALESCE(pay.total_paid_amount, 0) AS total_paid_amount
-FROM policies p
-LEFT JOIN paid_payments pay
-    ON p.policy_id = pay.policy_id
-    
+select *
+from final

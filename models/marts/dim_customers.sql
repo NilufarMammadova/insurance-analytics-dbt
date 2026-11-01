@@ -1,32 +1,42 @@
-WITH customers AS (
-
-    SELECT *
-    FROM {{ ref('stg_customers') }}
-
+with customers as (
+    select *
+    from {{ ref('stg_customers') }}
 ),
 
-customer_policies AS (
+policies as (
+    select *
+    from {{ ref('fct_policies') }}
+),
 
-    SELECT
+customer_policies as (
+    select
         customer_id,
-        COUNT(*) AS policy_count,
-        MIN(start_date) AS first_policy_date,
-        MAX(start_date) AS latest_policy_date,
-        SUM(total_paid_amount) AS lifetime_paid_amount
-    FROM {{ ref('fct_policies') }}
-    GROUP BY customer_id
+        min(start_date) as first_policy_date,
+        max(start_date) as latest_policy_date,
+        count(policy_id) as policy_count,
+        sum(total_paid_amount) as lifetime_paid_amount
 
+    from policies
+    group by customer_id
+),
+
+final as (
+    select
+        c.customer_id,
+        c.first_name,
+        c.last_name,
+        concat(c.first_name, ' ', c.last_name) as full_name,
+
+        cp.first_policy_date,
+        cp.latest_policy_date,
+
+        coalesce(cp.policy_count, 0) as policy_count,
+        coalesce(cp.lifetime_paid_amount, 0) as lifetime_paid_amount
+
+    from customers c
+    left join customer_policies cp
+        on c.customer_id = cp.customer_id
 )
 
-SELECT
-    c.customer_id,
-    c.first_name,
-    c.last_name,
-    CONCAT(c.first_name, ' ', c.last_name) AS full_name,
-    COALESCE(p.policy_count, 0) AS policy_count,
-    p.first_policy_date,
-    p.latest_policy_date,
-    COALESCE(p.lifetime_paid_amount, 0) AS lifetime_paid_amount
-FROM customers c
-LEFT JOIN customer_policies p
-    ON c.customer_id = p.customer_id
+select *
+from final

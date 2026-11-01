@@ -5,6 +5,18 @@ sources:
     schema: raw
     tables:
       - name: policies
+        description: "Raw insurance policy records."
+
+        config:
+          loaded_at_field: updated_at
+          freshness:
+            warn_after:
+              count: 24
+              period: hour
+            error_after:
+              count: 48
+              period: hour
+              
         columns:
           - name: policy_id
             data_tests:
@@ -17,6 +29,7 @@ sources:
                     severity: warn
 
       - name: customers
+        description: "Raw insurance customer records."
         columns:
           - name: customer_id
             data_tests:
@@ -24,6 +37,7 @@ sources:
               - not_null
 
       - name: payments
+        description: "Raw insurance payment records."
         columns:
           - name: payment_id
             data_tests:

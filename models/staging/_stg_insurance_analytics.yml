@@ -1,4 +1,3 @@
-
 version: 2
 
 models:
@@ -6,26 +5,35 @@ models:
     columns:
       - name: customer_id
         data_tests:
-          - not_null
           - unique
-
-  - name: stg_orders
-    columns:
-      - name: order_id
-        data_tests:
           - not_null
-          - unique
 
   - name: stg_policies
     columns:
       - name: policy_id
         data_tests:
-          - not_null
           - unique
-
-      - name: status
-        data_tests:
           - not_null
+
+      - name: policy_status
+        data_tests:
           - accepted_values:
               arguments:
-                values: ['active', 'inactive', 'cancelled']
+                values:
+                  - ACTIVE
+                  - EXPIRED
+                  - CANCELLED
+
+      - name: customer_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+
+  - name: stg_payments
+    columns:
+      - name: payment_id
+        data_tests:
+          - unique
+          - not_null

@@ -2,20 +2,56 @@ version: 2
 
 models:
   - name: stg_customers
+    description: >
+      Standardized customer data from the insurance source system.
+      Used as the foundation for customer analytics.
+
     columns:
       - name: customer_id
+        description: "Unique identifier of a customer."
         data_tests:
           - unique
           - not_null
+
+      - name: first_name
+        description: "Customer's first name after normalization."
+
+      - name: last_name
+        description: "Customer's last name after normalization."
 
   - name: stg_policies
+    description: >
+      Standardized insurance policy records.
+      Used for downstream policy reporting and analytics.
+
     columns:
       - name: policy_id
+        description: "Unique identifier of an insurance policy."
         data_tests:
           - unique
           - not_null
 
+      - name: policy_number
+        description: "Business identifier assigned to the policy."
+
+      - name: customer_id
+        description: "Foreign key referencing stg_customers.customer_id."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+
+      - name: premium_amount
+        description: "Premium amount associated with the policy."
+
+      - name: premium_quality_status
+        description: >
+          Classification of premium data quality:
+          VALID, MISSING_PREMIUM, ZERO_PREMIUM or NEGATIVE_PREMIUM.
+
       - name: policy_status
+        description: "{{ doc('policy_status') }}"
         data_tests:
           - accepted_values:
               arguments:
@@ -24,16 +60,35 @@ models:
                   - EXPIRED
                   - CANCELLED
 
-      - name: customer_id
-        data_tests:
-          - relationships:
-              arguments:
-                to: ref('stg_customers')
-                field: customer_id
+      - name: start_date
+        description: "Start date of insurance coverage."
+
+      - name: end_date
+        description: "End date of insurance coverage."
+
+      - name: updated_at
+        description: "Timestamp of the last recorded policy update."
 
   - name: stg_payments
+    description: >
+      Standardized insurance payment transactions.
+      Used to calculate policy-level payment metrics.
+
     columns:
       - name: payment_id
+        description: "Unique identifier of a payment transaction."
         data_tests:
           - unique
           - not_null
+
+      - name: policy_id
+        description: "Identifier of the associated insurance policy."
+
+      - name: amount
+        description: "Recorded payment amount."
+
+      - name: payment_date
+        description: "Date of the payment transaction."
+
+      - name: payment_status
+        description: "{{ doc('payment_status') }}"

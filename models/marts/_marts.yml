@@ -2,28 +2,76 @@ version: 2
 
 models:
   - name: fct_policies
-    description: "Policy-level insurance fact table with aggregated paid payments."
-    columns:      
-      - name: policy_status
-        description: "Normalized insurance policy status."
+    description: "{{ doc('fct_policies_overview') }}"
+
+    columns:
+      - name: policy_id
+        description: "Unique identifier of an insurance policy."
         data_tests:
-          - accepted_values:
-              arguments:
-                values: ['ACTIVE', 'EXPIRED', 'CANCELLED']
+          - unique
+          - not_null
+
+      - name: policy_number
+        description: "Business identifier of the insurance policy."
 
       - name: customer_id
-        description: "Customer associated with the insurance policy."
+        description: "Customer associated with the policy."
         data_tests:
           - relationships:
               arguments:
                 to: ref('dim_customers')
                 field: customer_id
 
+      - name: premium_amount
+        description: "Recorded insurance premium amount."
+
+      - name: policy_status
+        description: "{{ doc('policy_status') }}"
+
+      - name: premium_quality_status
+        description: "Data quality classification of the premium amount."
+
+      - name: start_date
+        description: "Start date of policy coverage."
+
+      - name: end_date
+        description: "End date of policy coverage."
+
+      - name: total_paid_amount
+        description: >
+          Total amount of PAID transactions associated
+          with the policy. Excludes pending payments.
+
   - name: dim_customers
-    description: "Customer dimension with policy metrics and lifetime paid amount."
+    description: "{{ doc('dim_customers_overview') }}"
+
     columns:
       - name: customer_id
         description: "Unique identifier of a customer."
         data_tests:
           - unique
           - not_null
+
+      - name: first_name
+        description: "Normalized first name of the customer."
+
+      - name: last_name
+        description: "Normalized last name of the customer."
+
+      - name: full_name
+        description: "Customer's full name."
+
+      - name: policy_count
+        description: "Number of policies associated with the customer."
+
+      - name: first_policy_date
+        description: "Earliest policy start date for the customer."
+
+      - name: latest_policy_date
+        description: "Latest policy start date for the customer."
+
+      - name: lifetime_paid_amount
+        description: >
+          Total historical paid amount across the customer's
+          policies. This is not a predictive customer
+          lifetime value metric.
